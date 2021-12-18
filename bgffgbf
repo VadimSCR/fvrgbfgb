@@ -1,0 +1,39 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Dec 18 09:58:28 2021
+
+@author: VAdim
+"""
+import cv2
+
+cam = cv2.VideoCapture(0)
+cv2.namedWindow("Camera", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Cnts", cv2.WINDOW_KEEPRATIO)
+
+while cam.isOpened():
+    _, image = cam.read()
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (7, 7), 0)
+    cnts = cv2.Canny(gray, 10, 100)
+
+    contours, _ = cv2.findContours(cnts, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    maxContour = contours[0]
+    for contour in contours:
+        print("Area = ", cv2.contourArea(contour), " ", end='')
+        maxArea = cv2.contourArea(maxContour)
+        curArea = cv2.contourArea(contour)
+        if curArea > maxArea:
+            maxContour = contour
+
+    cv2.drawContours(image, [maxContour], 0, (0,255,0), 1)
+
+    key = cv2.waitKey(1)
+    if key == ord('q'):
+        break
+
+    cv2.imshow("Cnts", cnts)
+    cv2.imshow("Camera", image)
+
+cam.release()
+cv2.destroyAllWindows
